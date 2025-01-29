@@ -1,48 +1,40 @@
-function startGame() {
-    let playerMoney = 20;
-    const betInput = document.getElementById('betAmount');
-    const resultDisplay = document.getElementById('result');
+document.addEventListener('DOMContentLoaded', () => {
+    let money = 20;
     const moneyDisplay = document.getElementById('money');
+    const betAmountInput = document.getElementById('betAmount');
+    const betButton = document.getElementById('betButton');
+    const slotResults = document.getElementById('slotResults');
+    const message = document.getElementById('message');
 
-    moneyDisplay.textContent = `Money: $${playerMoney}`;
-
-    document.getElementById('spinButton').addEventListener('click', function() {
-        const betAmount = parseInt(betInput.value);
-        
-        if (isNaN(betAmount) || betAmount <= 0 || betAmount > playerMoney) {
-            alert('Invalid bet amount!');
+    betButton.addEventListener('click', () => {
+        const betAmount = parseInt(betAmountInput.value);
+        if (isNaN(betAmount) || betAmount < 1 || betAmount > money) {
+            message.textContent = 'Invalid bet amount';
             return;
         }
 
-        playerMoney -= betAmount;
-        moneyDisplay.textContent = `Money: $${playerMoney}`;
+        money -= betAmount;
+        moneyDisplay.textContent = money;
 
-        const slots = [getRandomSlot(), getRandomSlot(), getRandomSlot()];
-        resultDisplay.textContent = `Slots: ${slots.join(' | ')}`;
+        const slots = [Math.floor(Math.random() * 10), Math.floor(Math.random() * 10), Math.floor(Math.random() * 10)];
+        slotResults.textContent = slots.join(' ');
 
-        const payout = calculatePayout(slots, betAmount);
-        playerMoney += payout;
-        moneyDisplay.textContent = `Money: $${playerMoney}`;
+        let winnings = 0;
+
+        if (slots[0] === slots[1] && slots[1] === slots[2]) {
+            winnings = betAmount * (slots[0] === 7 ? 20 : 7);
+        } else if (slots[0] === slots[1] || slots[1] === slots[2] || slots[0] === slots[2]) {
+            if (slots[0] === 7 && slots[1] === 7 || slots[1] === 7 && slots[2] === 7) {
+                winnings = betAmount * 7;
+            } else if (slots[0] === 7 || slots[1] === 7 || slots[2] === 7) {
+                winnings = betAmount * 3;
+            } else {
+                winnings = betAmount * 2;
+            }
+        }
+
+        money += winnings;
+        moneyDisplay.textContent = money;
+        message.textContent = winnings > 0 ? `You won ${winnings}!` : 'You lost!';
     });
-}
-
-function getRandomSlot() {
-    return Math.floor(Math.random() * 10);
-}
-
-function calculatePayout(slots, betAmount) {
-    const uniqueSlots = new Set(slots);
-    let payout = 0;
-
-    if (uniqueSlots.size === 1) {
-        payout = betAmount * 10; // All three slots match
-    } else if (uniqueSlots.size === 2) {
-        payout = betAmount * 2; // Two slots match
-    } else {
-        payout = 0; // No match
-    }
-
-    return payout;
-}
-
-window.onload = startGame;
+});
